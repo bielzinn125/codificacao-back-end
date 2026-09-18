@@ -10,13 +10,13 @@ process.on('unhandledRejection', (reason) => {
     console.error('[PROMISSE REJEITADA - unhandledRejection]:', reason);
 });
 
-app.get('/sucesso', (req , res) => {
+app.get('/sucesso', (req , res, next) => {
     res.json({success: true, message: 'Operação Realizada Com Sucesso!'});
 });
 
 app.get('/erro-sincrono', (req, res, next) => {
     try{
-        throw new Error('Falha ao processar a regra de negócio!')
+        throw new Error('Falha ao processar a regra de negócio!');
     } catch(erro){
         next(erro);
     }
