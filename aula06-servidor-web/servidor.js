@@ -9,7 +9,7 @@ const servidorWeb = http.createServer((req, res) =>{
 
 
     };
-    if(res.url === '/status'){
+    if(req.url === '/status'){
         res.writeHead(200, {
             ...cabecalhoPadrao,
             'content-type': 'application/json'
