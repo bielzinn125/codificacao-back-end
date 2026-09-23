@@ -1,147 +1,386 @@
-API de Convidados — NestJS
 
-Projeto desenvolvido com NestJS para praticar a criação de uma API REST simples de gerenciamento de convidados.
+ # API de Convidados — Aula 08 e 09 - NestJS
 
-A aplicação utiliza uma estrutura baseada em Controller, Service e DTO, mantendo os dados em memória.
+ Neste exercício criamos uma API simples para **cadastrar, consultar, atualizar e remover convidados**, utilizando **NestJS e TypeScript**.
 
-🚀 Tecnologias
+ A ideia foi praticar na prática como funcionam os principais métodos HTTP de uma API REST:
 
-Node.js
+ - `GET`
+- `POST`
+- `PATCH`
+- `DELETE`
 
-NestJS
+ Também utilizamos o **Insomnia** para fazer as requisições e verificar o funcionamento dos endpoints.
 
-TypeScript
+---
 
-REST API
+ ## O que fizemos
 
-DTO (Data Transfer Object)
+ Durante o exercício, trabalhamos principalmente em três arquivos:
 
-📁 Estrutura principal
-
+```
 src/
-├── app.controller.ts
-├── app.module.ts
-├── app.service.ts
 ├── convidados.controller.ts
 ├── convidados.service.ts
-├── criar-convidado.dto.ts
-└── main.ts
+└── criar-convidado.dto.ts
+```
 
-Responsabilidades
+ Cada arquivo possui uma responsabilidade diferente dentro da aplicação.
 
-ConvidadosController: recebe as requisições HTTP e disponibiliza as rotas da API.
+---
 
-ConvidadosService: concentra as regras de negócio e manipula a lista de convidados.
+ ## 1\. `convidados.service.ts`
 
-CriarConvidadoDto: define os dados necessários para cadastrar um convidado.
+ No **Service** colocamos a lógica responsável pelos convidados.
 
-AppModule: organiza e registra os componentes da aplicação.
+ Criamos uma lista inicialmente com alguns convidados:
 
-main.ts: inicializa o servidor NestJS.
+```
+private convidados = [
+  { id: 1, nome: 'Rebeca', idade: 20 },
+  { id: 2, nome: 'Leonardo', idade: 18 },
+  { id: 3, nome: 'Sergio', idade: 18 },
+  { id: 4, nome: 'Mariano', idade: 22 },
+  { id: 5, nome: 'Alvaro', idade: 21 },
+];
+```
 
-⚙️ Instalação
+ Depois criamos métodos para realizar as operações:
 
-Clone o projeto e instale as dependências:
+ ### Listar convidados
 
-npm install
+```
+listarConvidados()
+```
 
-▶️ Executando o projeto
+ Esse método retorna todos os convidados existentes na lista.
 
-Desenvolvimento
+ ### Encontrar um convidado
 
-npm run start:dev
+```
+encontrarConvidado(id)
+```
 
-Por padrão, a aplicação será executada em:
+ Esse método procura um convidado pelo seu `id`.
 
-http://localhost:3000
+ Caso o convidado não seja encontrado, utilizamos:
 
-📌 Endpoints
+```
+NotFoundException
+```
 
-Listar convidados
+ para informar que aquele convidado não existe.
 
-GET /convidados
+ ### Atualizar idade
 
-Retorna todos os convidados cadastrados.
+ Criamos o método:
 
-Cadastrar convidado
+```
+atualizarIdade(id, idade)
+```
 
-POST /convidados
-Content-Type: application/json
+ Ele procura o convidado pelo ID e altera sua idade.
 
-Exemplo de corpo:
+ ### Remover convidado
 
+ Também criamos:
+
+```
+removerConvidadoLista(id)
+```
+
+ Esse método encontra o convidado pelo ID e remove ele da lista utilizando `splice()`.
+
+---
+
+ # 2\. `criar-convidado.dto.ts`
+
+ Criamos um **DTO (Data Transfer Object)** para definir quais informações são necessárias para criar um convidado.
+
+```
+export class CriarConvidadoDto {
+  nome: string;
+  idade: number;
+}
+```
+
+ Assim, quando fazemos um `POST`, esperamos receber:
+
+```
 {
   "nome": "João",
-  "idade": 20
+  "idade": 25
 }
+```
 
-Atualizar idade
+ O DTO deixa definido que o convidado possui:
 
-PATCH /convidados/:id
-Content-Type: application/json
+ - `nome` → `string`
+- `idade` → `number`
 
-Exemplo:
+---
 
-PATCH /convidados/1
+ # 3\. `convidados.controller.ts`
 
+ No **Controller** criamos as rotas da API.
+
+ Definimos o controller com:
+
+```
+@Controller('convidados')
+```
+
+ Por isso, todas as nossas requisições começam com:
+
+```
+/convidados
+```
+
+ O Controller recebe as requisições e chama os métodos que criamos no Service.
+
+---
+
+ # GET — Listar convidados
+
+ Criamos uma rota `GET`:
+
+```
+@Get()
+listaConvidados() {
+  return this.convidadoService.listarConvidados();
+}
+```
+
+ No Insomnia testamos:
+
+```
+GET http://localhost:3000/convidados
+```
+
+ Essa requisição retorna a lista de convidados.
+
+ Exemplo:
+
+```
+[
+  {
+    "id": 1,
+    "nome": "Rebeca",
+    "idade": 20
+  },
+  {
+    "id": 2,
+    "nome": "Leonardo",
+    "idade": 18
+  }
+]
+```
+
+---
+
+ # POST — Criar convidado
+
+ Depois criamos a rota `POST` para adicionar um novo convidado.
+
+```
+@Post()
+criarConvidado(@Body() criarConvidado: CriarConvidadoDto) {
+  ...
+}
+```
+
+ No Insomnia enviamos:
+
+```
+POST http://localhost:3000/convidados
+```
+
+ Com um JSON no Body:
+
+```
 {
-  "idade": 21
+  "nome": "João",
+  "idade": 25
 }
+```
 
-Remover convidado
+ O Controller recebe os dados através do:
 
+```
+@Body()
+```
+
+ e envia essas informações para serem processadas.
+
+---
+
+ # PATCH — Atualizar convidado
+
+ Também criamos uma rota `PATCH` para atualizar a idade de um convidado.
+
+```
+@Patch(':id')
+```
+
+ No Insomnia testamos:
+
+```
+PATCH http://localhost:3000/convidados/1
+```
+
+ Enviando no Body:
+
+```
+{
+  "idade": 30
+}
+```
+
+ Nesse caso:
+
+ - `1` é o ID do convidado;
+- `30` é a nova idade.
+
+ Utilizamos:
+
+```
+@Param('id')
+```
+
+ para pegar o ID que veio pela URL e:
+
+```
+@Body('idade')
+```
+
+ para pegar a nova idade enviada no Body.
+
+---
+
+ # DELETE — Remover convidado
+
+ Por último, criamos a rota `DELETE` para remover um convidado.
+
+```
+@Delete(':id')
+```
+
+ No Insomnia testamos:
+
+```
+DELETE http://localhost:3000/convidados/1
+```
+
+ O ID `1` é recebido através do:
+
+```
+@Param('id')
+```
+
+ Depois o Service procura esse convidado e remove ele da lista.
+
+---
+
+ # Testes realizados no Insomnia
+
+ Utilizamos o **Insomnia** para testar todas as rotas que criamos.
+
+ ### 1\. GET
+
+```
+GET /convidados
+```
+
+ Testamos se a API conseguia retornar os convidados cadastrados.
+
+ ### 2\. POST
+
+```
+POST /convidados
+```
+
+ Testamos a criação de um novo convidado enviando `nome` e `idade`.
+
+ ### 3\. PATCH
+
+```
+PATCH /convidados/:id
+```
+
+ Testamos a alteração da idade de um convidado existente.
+
+ ### 4. DELETE
+
+```
 DELETE /convidados/:id
+```
 
-Exemplo:
+ Testamos a remoção de um convidado da lista.
 
-DELETE /convidados/1
+---
 
-🧪 Exemplos com cURL
+ # Fluxo que aprendemos
 
-curl http://localhost:3000/convidados
+ O funcionamento ficou dividido desta forma:
 
-curl -X POST http://localhost:3000/convidados ^
-  -H "Content-Type: application/json" ^
-  -d "{\"nome\":\"João\",\"idade\":20}"
+```
+                 INSOMNIA
+                     │
+                     ▼
+              HTTP Request
+                     │
+                     ▼
+              CONTROLLER
+                     │
+                     ▼
+                SERVICE
+                     │
+                     ▼
+          Lista de convidados
+```
 
-curl -X PATCH http://localhost:3000/convidados/1 ^
-  -H "Content-Type: application/json" ^
-  -d "{\"idade\":21}"
+ O **Insomnia** envia a requisição.
 
-curl -X DELETE http://localhost:3000/convidados/1
+ O **Controller** identifica qual operação deve ser realizada.
 
-No PowerShell, também é possível utilizar Invoke-RestMethod para testar os endpoints.
+ O **Service** executa a lógica da operação.
 
-💾 Armazenamento
+ Depois o resultado é retornado para quem fez a requisição.
 
-Os convidados estão sendo armazenados em uma lista dentro do ConvidadosService. Portanto:
+---
 
-os dados são temporários;
+ # Conceitos praticados
 
-os registros são perdidos quando a aplicação é reiniciada;
+ Neste exercício praticamos:
 
-não existe banco de dados nesta versão.
+ - Criação de API com NestJS
+- Controllers
+- Services
+- DTO
+- Injeção de dependência
+- `@Controller()`
+- `@Get()`
+- `@Post()`
+- `@Patch()`
+- `@Delete()`
+- `@Body()`
+- `@Param()`
+- `NotFoundException`
+- Manipulação de arrays
+- Requisições HTTP
+- Testes de API utilizando Insomnia
 
-⚠️ Erro de dependência
+---
 
-Caso apareça uma mensagem semelhante a:
+ ## Resultado
 
-Nest can't resolve dependencies of the ConvidadosController
+ Ao final do exercício, criamos uma API de convidados capaz de realizar as quatro operações básicas:
 
-verifique se ConvidadosService está registrado no AppModule.
+```
+GET     → consultar convidados
+POST    → cadastrar convidado
+PATCH   → atualizar idade
+DELETE  → remover convidado
+```
 
-Exemplo:
-
-@Module({
-  imports: [],
-  controllers: [ConvidadosController],
-  providers: [ConvidadosService],
-})
-export class AppModule {}
-
-Também confira se o ConvidadosService possui:
-
-@Injectable()
-export class ConvidadosService {
-  // ...
-}
+ Os dados foram armazenados **em memória**, dentro de um array no Service. Portanto, os dados não são persistidos em um banco de dados. O objetivo principal foi praticar a estrutura de uma API REST utilizando NestJS e entender como **Controller, Service, DTO e requisições HTTP** trabalham juntos.
