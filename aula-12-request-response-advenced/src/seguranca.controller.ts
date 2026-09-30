@@ -9,6 +9,7 @@ export class SegurancaController {
             res.setHeader('y-auth-status', 'verificado');
             return res.status(200).json({
                 mensagem: 'Acesso concedido a Area Secreta!',
+                 log:new Date(),
             });
         }
         return res.status(403).json({

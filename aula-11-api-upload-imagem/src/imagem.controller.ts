@@ -1,4 +1,4 @@
-import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException } from "@nestjs/common";
+import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException } from "@nestjs/commnpmon";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { diskStorage} from "multer";
 import { v4 as uuidv4 } from "uuid";
